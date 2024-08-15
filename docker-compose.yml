@@ -1,0 +1,16 @@
+services:
+  django-backend:
+    build:
+      context: .
+    env_file:
+      - .env
+    restart: "on-failure"
+    networks:
+      - django-backend
+
+networks:
+  django-backend:
+    driver: bridge
+    
+volumes:
+  static:
