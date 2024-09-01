@@ -1,0 +1,103 @@
+*{
+  padding: 0;
+  margin: 0;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+
+.leaflet-container {
+  width: 100%;
+  height: 100vh;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: #114302;
+  color: #ffffff;
+  border: 2px solid #fff;
+}
+
+.leaflet-control-geosearch form {
+  background: #f4f4f4;
+  border-radius: 4px;
+}
+
+.leaflet-control-geosearch form input {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px 20px;
+}
+
+.leaflet-control-geosearch form button {
+  background: #1273db;
+  color: white;
+  padding: 10px;
+  border: none;
+}
+
+.leaflet-control-geosearch .results {
+  background: #fff;
+  border-radius: 4px;
+}
+
+.leaflet-control-geosearch .results > * {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+
+
+.route-form-container {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.route-input {
+  padding: 10px 15px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  margin-top: 20px;
+}
+
+.route-input:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.route-submit {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.route-submit:hover {
+  background-color: #0056b3;
+}
+
+.route-submit:focus {
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
+}
+
+@media (min-width: 768px) {
+  .route-form {
+    flex-direction: row;
+  }
+
+  .route-input {
+    flex: 1;
+  }
+
+  .route-submit {
+    align-self: flex-start;
+  }
+}
