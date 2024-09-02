@@ -7,6 +7,7 @@ import { OpenStreetMapProvider, GeoSearchControl } from 'leaflet-geosearch'
 import L from 'leaflet';
 import 'leaflet-routing-machine';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
+import { Icon } from 'leaflet';
 
 const fetcher = (url) => axios.get(url).then((res) => res.data);
 
@@ -42,6 +43,16 @@ const RoutingMachine = ({ start, end }) => {
 
   return null;
 };
+
+export const icon = new Icon({
+  iconUrl: "loc.jpeg",
+  shadowUrl: "leaf-shadow.png",
+  iconSize: [38, 95],
+  shadowSize: [50, 64],
+  iconAnchor: [22, 94],
+  shadowAnchor: [4, 62],
+  popupAnchor: [-3, -76],
+});
 
 function App() {
   const center = [0.3556, 37.5833];
@@ -99,7 +110,7 @@ function App() {
       <div style={{ display: "flex" }}>
         <MapContainer center={center} zoom={zoom} ref={mapRef}>
           <TileLayer
-            url="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
           />
           <Search provider={new OpenStreetMapProvider()} />
@@ -142,7 +153,7 @@ function App() {
               placeholder="End location"
               className="route-input"
             /> <br />
-            <button type="submit" className="route-submit">Get Route</button>
+            <button type="submit" className="route-submit">Set Route</button>
           </form>
         </div>
       </div>
