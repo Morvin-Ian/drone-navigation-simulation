@@ -3,13 +3,8 @@ FROM python:3.9
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-
-RUN apt-get update \
-   && apt-get -y install gcc postgresql \
-   && apt-get clean
-
 # Install system dependencies
-RUN apt-get update && apt-get install -y \ 
+RUN apt-get update && apt-get install -y \
     binutils \
     libproj-dev \
     gdal-bin \

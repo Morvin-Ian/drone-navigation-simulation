@@ -34,6 +34,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(" ")
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'leaflet',
     'corsheaders',
     'rest_framework',
@@ -83,6 +84,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
+# Asynchronous Server Gateway Interface
+ASGI_APPLICATION = "core.asgi.application"
+
+
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -116,6 +121,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [("redis", 6379)],
+            },
+        },
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -133,6 +146,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -157,5 +171,5 @@ LEAFLET_CONFIG = {
     "DEFAULT_CENTER": (-1.30, 36.85),
     "DEFAULT_ZOOM": 3,
     "SCALE":"both",
-    "ATTRIBUTION_PREFIX":"Health Facilities - Kenya"
+    "ATTRIBUTION_PREFIX":"Drone Navigation - Kenya"
 }

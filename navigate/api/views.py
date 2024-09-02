@@ -1,3 +1,8 @@
-from django.shortcuts import render
+from rest_framework.generics import ListAPIView
+from navigate.models import HealthFacilities
+from .serializers import HealthFacilitiesSerializer
 
-# Create your views here.
+
+class HealthFacilitiesView(ListAPIView):
+    queryset = HealthFacilities.objects.all()
+    serializer_class = HealthFacilitiesSerializer
