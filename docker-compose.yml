@@ -10,7 +10,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: "on-failure"
     networks:
       - facilities-api
@@ -27,6 +28,11 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     networks:
       - facilities-api
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   frontend:
     build:
@@ -51,6 +57,13 @@ services:
     depends_on:
       - facilities-api
       - frontend
+    networks:
+      - facilities-api
+    
+  
+  redis:
+    image: "redis:alpine"
+    container_name: redis_container
     networks:
       - facilities-api
 

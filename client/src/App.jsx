@@ -3,7 +3,6 @@ import { MapContainer, TileLayer, Popup, Marker, useMap } from "react-leaflet";
 import { Alert, Spinner } from "react-bootstrap";
 import axios from "axios";
 import useSWR from "swr";
-import './App.css';
 import { OpenStreetMapProvider, GeoSearchControl } from 'leaflet-geosearch'
 import L from 'leaflet';
 import 'leaflet-routing-machine';
