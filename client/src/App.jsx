@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { MapContainer, TileLayer, Popup, Marker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import useSWR from 'swr';
@@ -7,7 +7,8 @@ import { OpenStreetMapProvider, GeoSearchControl } from 'leaflet-geosearch';
 import L from 'leaflet';
 import 'leaflet-routing-machine';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
-import { Icon } from 'leaflet';
+import Facilities from './components/Facilities';
+import Drones from './components/Drones';
 
 const fetcher = (url) => axios.get(url).then((res) => res.data);
 
@@ -44,9 +45,10 @@ const RoutingMachine = ({ start, end }) => {
   return null;
 };
 
-export const icon = new Icon({
+export const icon = new L.Icon({
   iconUrl: 'drone.png',
-  iconSize: [58, 95],
+  iconSize: [60, 50],
+  shadowSize: [50, 64],
   iconAnchor: [22, 94],
   popupAnchor: [-3, -76],
 });
@@ -116,39 +118,8 @@ function App() {
             attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
           />
           <Search provider={new OpenStreetMapProvider()} />
-          {facilities.features.map((facility) => (
-            <Marker
-              key={facility.properties.name}
-              position={[facility.geometry.coordinates[1], facility.geometry.coordinates[0]]}
-              onClick={() => {
-                setActiveFacility(facility);
-              }}
-            >
-              <Popup
-                position={[facility.geometry.coordinates[1], facility.geometry.coordinates[0]]}
-                onClose={() => setActiveFacility(null)}
-              >
-                <div>
-                  <h6>Name: {facility.properties.name ? facility.properties.name : 'Unnamed Facility'}</h6>
-                  <h6>Amenity: {facility.properties.amenity}</h6>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
-          {fetchedDrones.features.map((drone) => (
-            <Marker
-              key={drone.properties.serial_no}
-              position={[drone.geometry.coordinates[1], drone.geometry.coordinates[0]]}
-              icon={icon}
-            >
-              <Popup>
-                <div>
-                  <h6>Name: {drone.properties.name}</h6>
-                  <h6>Serial: {drone.properties.serial_no}</h6>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
+          <Facilities facilities={facilities} setActiveFacility={setActiveFacility} />
+          <Drones drones={fetchedDrones} />
           {route && <RoutingMachine start={route.start} end={route.end} />}
         </MapContainer>
 
