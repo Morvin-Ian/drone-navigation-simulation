@@ -35,8 +35,12 @@ const RoutingMachine = ({ start, end }) => {
           L.latLng(start[0], start[1]),
           L.latLng(end[0], end[1]),
         ],
-        routeWhileDragging: true,
+        // routeWhileDragging: true,
       }).addTo(map);
+
+      const confirmation = confirm("Are you sure")
+      console.log(confirmation)
+
 
       return () => map.removeControl(routingControl);
     }
@@ -67,6 +71,9 @@ function App() {
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
   const [route, setRoute] = useState(null);
+  const [selectedDrone, setSelectedDrone] = useState('');
+
+
   const mapRef = useRef();
 
   const handleSubmit = async (e) => {
@@ -126,24 +133,43 @@ function App() {
         <div className="route-form-container">
           <h3>Generate Routes</h3>
           <form onSubmit={handleSubmit} className="route-form">
+            <select id="mySelect" value={selectedDrone} onClick={(e) => setSelectedDrone(e.target.value)} required className="route-input">
+              <option value="">--Please choose an option--</option>
+              {drones && drones?.features?.map((drone) => (
+                <option key={drone?.properties.serial_no} value={drone.properties.name} >
+                  {drone.properties.name}
+                </option>
+              ))}
+            </select>
             <input
               type="text"
               value={start}
               onChange={(e) => setStart(e.target.value)}
-              placeholder="Start location"
+              placeholder="Depature Healthcare Center"
               className="route-input"
+              list="facilities-list"
+              required
             />
             <br />
             <input
               type="text"
               value={end}
               onChange={(e) => setEnd(e.target.value)}
-              placeholder="End location"
+              placeholder="Destination Healthcare Center"
               className="route-input"
+              list="facilities-list"
+              required
             />
+
+            {/* Datalist with options from the fetched facilities */}
+            <datalist id="facilities-list">
+              {facilities?.features.map((facility) => (
+                <option key={facility.geometry.coordinates[1]} value={facility.properties.name} />
+              ))}
+            </datalist>
             <br />
             <button type="submit" className="route-submit">
-              Set Route
+              Create Route
             </button>
           </form>
         </div>

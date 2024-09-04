@@ -6,7 +6,7 @@ const Drones = ({ drones }) => {
     <>
       {drones.features.map((drone) => (
         <Marker
-          key={drone.properties.id}
+          key={drone.properties.serial_no}
           position={[drone.geometry.coordinates[1], drone.geometry.coordinates[0]]}
           icon={icon}
         >

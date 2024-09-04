@@ -1,103 +1,170 @@
-*{
+/* General Reset */
+* {
   padding: 0;
   margin: 0;
+  box-sizing: border-box;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
+/* Map Container */
 .leaflet-container {
-  width: 100%;
+  width: 80%;
   height: 100vh;
 }
 
+/* Popup Style */
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
-  background: #114302;
+  background: #2e8b57;
   color: #ffffff;
-  border: 2px solid #fff;
+  border: none;
+  border-radius: 8px;
 }
 
+.leaflet-popup-content-wrapper {
+  padding: 15px;
+}
+
+/* GeoSearch Control */
 .leaflet-control-geosearch form {
-  background: #f4f4f4;
-  border-radius: 4px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .leaflet-control-geosearch form input {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 10px 20px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  padding: 10px 15px;
+  font-size: 14px;
 }
 
 .leaflet-control-geosearch form button {
-  background: #1273db;
+  background: #007bff;
   color: white;
-  padding: 10px;
+  padding: 10px 15px;
   border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.leaflet-control-geosearch form button:hover {
+  background: #0056b3;
 }
 
 .leaflet-control-geosearch .results {
-  background: #fff;
-  border-radius: 4px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .leaflet-control-geosearch .results > * {
-  padding: 8px;
+  padding: 10px 15px;
   border-bottom: 1px solid #eee;
 }
 
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+}
 
+/* Container Styles */
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+/* Map Container */
+.map-container {
+  flex: 2;
+  position: relative;
+}
+
+/* Form Container */
 .route-form-container {
+  flex: 1;
   padding: 20px;
-  background-color: #f8f9fa;
+  background: linear-gradient(135deg, #ffffff, #e0e0e0);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 20px;
+}
+
+.route-form-container h3{
+  margin-bottom: 10px;
+}
+
+/* Form Styles */
+.route-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .route-input {
-  padding: 10px 15px;
-  border: 1px solid #ced4da;
+  padding: 10px;
+  border: 1px solid #ccc;
   border-radius: 4px;
-  font-size: 16px;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  margin-top: 20px;
+  transition: border-color 0.3s ease;
 }
 
 .route-input:focus {
-  border-color: #80bdff;
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  border-color: #007bff;
+  outline: none;
+}
+
+.route-input::placeholder {
+  color: #aaa;
 }
 
 .route-submit {
-  margin-top: 10px;
-  padding: 10px 20px;
-  background-color: #007bff;
+  padding: 10px;
+  background: linear-gradient(135deg, #007bff, #0056b3);
   color: white;
   border: none;
   border-radius: 4px;
-  font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.15s ease-in-out;
+  transition: background 0.3s ease;
 }
 
 .route-submit:hover {
-  background-color: #0056b3;
+  background: linear-gradient(135deg, #0056b3, #007bff);
 }
 
-.route-submit:focus {
-  outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.5);
+/* Select Styles */
+select.route-input {
+  appearance: none;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6" viewBox="0 0 10 6"><polygon points="0,0 10,0 5,6" fill="black"/></svg>') no-repeat right 10px center;
+  background-color: white;
+  padding-right: 30px;
 }
 
-@media (min-width: 768px) {
-  .route-form {
-    flex-direction: row;
-  }
+/* Datalist Styles */
+datalist {
+  display: none;
+}
 
-  .route-input {
-    flex: 1;
-  }
+/* Alert Styles */
+.alert {
+  padding: 15px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
 
-  .route-submit {
-    align-self: flex-start;
-  }
+.alert-danger {
+  color: #721c24;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+}
+
+/* Spinner Styles */
+.spinner {
+  margin: 50px auto;
 }

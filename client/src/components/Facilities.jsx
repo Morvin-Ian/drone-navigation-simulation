@@ -5,7 +5,7 @@ const Facilities = ({ facilities, setActiveFacility }) => {
     <>
       {facilities.features.map((facility) => (
         <Marker
-          key={facility.properties.name}
+          key={facility.geometry.coordinates[1]}
           position={[facility.geometry.coordinates[1], facility.geometry.coordinates[0]]}
           onClick={() => {
             setActiveFacility(facility);
