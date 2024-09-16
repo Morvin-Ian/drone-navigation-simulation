@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, useMap, Marker } from 'react-leaflet';
 import { Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import useSWR from 'swr';
@@ -25,7 +25,7 @@ const Search = (props) => {
   return null;
 };
 
-const RoutingMachine = ({ start, end }) => {
+const RoutingMachine = ({ start, end, handleRouteFound }) => {
   const map = useMap();
 
   useEffect(() => {
@@ -35,11 +35,21 @@ const RoutingMachine = ({ start, end }) => {
           L.latLng(start[0], start[1]),
           L.latLng(end[0], end[1]),
         ],
-        // routeWhileDragging: true,
+        lineOptions: {
+          styles: [{ color: '#6FA1EC', weight: 4 }]
+        },
+        show: false,
+        addWaypoints: false,
+        routeWhileDragging: true,
+        fitSelectedRoutes: true,
+        showAlternatives: false,
       }).addTo(map);
 
-      const confirmation = confirm("Are you sure")
-      console.log(confirmation)
+      routingControl.on('routesfound', function (e) {
+        const routes = e.routes;
+        const coordinates = routes[0].coordinates;
+        handleRouteFound(coordinates);
+      });
 
 
       return () => map.removeControl(routingControl);
@@ -57,6 +67,42 @@ export const icon = new L.Icon({
   popupAnchor: [-3, -76],
 });
 
+
+const MovingDrone = ({ route }) => {
+  const [position, setPosition] = useState(null);
+  const map = useMap();
+  const markerRef = useRef(null);
+
+  useEffect(() => {
+    if (route && route.length > 0) {
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < route.length) {
+          setPosition(route[i]);
+          if (markerRef.current) {
+            markerRef.current.setLatLng(route[i]);
+          }
+          i++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 1000); // Move every second
+
+      return () => clearInterval(interval);
+    }
+  }, [route, map]);
+
+  if (!position) return null;
+
+  return (
+    <Marker
+      position={position}
+      icon={icon}
+      ref={markerRef}
+    />
+  );
+};
+
 function App() {
   const center = [0.3556, 37.5833];
   const zoom = 7;
@@ -72,6 +118,7 @@ function App() {
   const [end, setEnd] = useState('');
   const [route, setRoute] = useState(null);
   const [selectedDrone, setSelectedDrone] = useState('');
+  const [droneRoute, setDroneRoute] = useState(null);
 
 
   const mapRef = useRef();
@@ -94,6 +141,10 @@ function App() {
     } else {
       alert('Could not find one or both locations');
     }
+  };
+
+  const handleRouteFound = (coordinates) => {
+    setDroneRoute(coordinates);
   };
 
   if (error) {
@@ -127,7 +178,8 @@ function App() {
           <Search provider={new OpenStreetMapProvider()} />
           <Facilities facilities={facilities} setActiveFacility={setActiveFacility} />
           <Drones drones={fetchedDrones} />
-          {route && <RoutingMachine start={route.start} end={route.end} />}
+          {route && <RoutingMachine start={route.start} end={route.end} handleRouteFound={handleRouteFound} />}
+          {droneRoute && <MovingDrone route={droneRoute} />}
         </MapContainer>
 
         <div className="route-form-container">
