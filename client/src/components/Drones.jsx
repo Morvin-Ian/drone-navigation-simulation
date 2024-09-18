@@ -5,6 +5,7 @@ const Drones = ({ drones }) => {
   return (
     <>
       {drones.features.map((drone) => (
+        !drone.properties.occupied &&
         <Marker
           key={drone.properties.serial_no}
           position={[drone.geometry.coordinates[1], drone.geometry.coordinates[0]]}

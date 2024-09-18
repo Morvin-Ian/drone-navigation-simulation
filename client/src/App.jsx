@@ -1,63 +1,20 @@
-import { useEffect, useState, useRef } from 'react';
-import { MapContainer, TileLayer, useMap, Marker } from 'react-leaflet';
+import {  useState, useRef } from 'react';
+import { MapContainer, TileLayer} from 'react-leaflet';
 import { Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import useSWR from 'swr';
-import { OpenStreetMapProvider, GeoSearchControl } from 'leaflet-geosearch';
+import { OpenStreetMapProvider } from 'leaflet-geosearch';
 import L from 'leaflet';
 import 'leaflet-routing-machine';
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
 import Facilities from './components/Facilities';
 import Drones from './components/Drones';
+import RoutingMachine from './components/RoutingMachine';
+import Search from './components/Search';
+import MovingDrone from './components/MovingDrone';
 
 const fetcher = (url) => axios.get(url).then((res) => res.data);
 
-const Search = (props) => {
-  const map = useMap();
-  const { provider } = props;
-  useEffect(() => {
-    const searchControl = new GeoSearchControl({
-      provider,
-    });
-    map.addControl(searchControl);
-    return () => map.removeControl(searchControl);
-  }, [props]);
-  return null;
-};
-
-const RoutingMachine = ({ start, end, handleRouteFound }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    if (start && end) {
-      const routingControl = L.Routing.control({
-        waypoints: [
-          L.latLng(start[0], start[1]),
-          L.latLng(end[0], end[1]),
-        ],
-        lineOptions: {
-          styles: [{ color: '#6FA1EC', weight: 4 }]
-        },
-        show: false,
-        addWaypoints: false,
-        routeWhileDragging: true,
-        fitSelectedRoutes: true,
-        showAlternatives: false,
-      }).addTo(map);
-
-      routingControl.on('routesfound', function (e) {
-        const routes = e.routes;
-        const coordinates = routes[0].coordinates;
-        handleRouteFound(coordinates);
-      });
-
-
-      return () => map.removeControl(routingControl);
-    }
-  }, [map, start, end]);
-
-  return null;
-};
 
 export const icon = new L.Icon({
   iconUrl: 'drone.png',
@@ -67,41 +24,6 @@ export const icon = new L.Icon({
   popupAnchor: [-3, -76],
 });
 
-
-const MovingDrone = ({ route }) => {
-  const [position, setPosition] = useState(null);
-  const map = useMap();
-  const markerRef = useRef(null);
-
-  useEffect(() => {
-    if (route && route.length > 0) {
-      let i = 0;
-      const interval = setInterval(() => {
-        if (i < route.length) {
-          setPosition(route[i]);
-          if (markerRef.current) {
-            markerRef.current.setLatLng(route[i]);
-          }
-          i++;
-        } else {
-          clearInterval(interval);
-        }
-      }, 1000); // Move every second
-
-      return () => clearInterval(interval);
-    }
-  }, [route, map]);
-
-  if (!position) return null;
-
-  return (
-    <Marker
-      position={position}
-      icon={icon}
-      ref={markerRef}
-    />
-  );
-};
 
 function App() {
   const center = [0.3556, 37.5833];
@@ -119,7 +41,7 @@ function App() {
   const [route, setRoute] = useState(null);
   const [selectedDrone, setSelectedDrone] = useState('');
   const [droneRoute, setDroneRoute] = useState(null);
-
+  const [selectedDroneId, setSelectedDroneId] = useState(null);
 
   const mapRef = useRef();
 
@@ -127,24 +49,60 @@ function App() {
     e.preventDefault();
     const provider = new OpenStreetMapProvider();
 
+    if(start === end){
+      alert('Departure and Destination locations cannot be the same');
+      return;
+    }
     const startResults = await provider.search({ query: start });
     const endResults = await provider.search({ query: end });
 
     if (startResults.length > 0 && endResults.length > 0) {
       const startCoords = [startResults[0].y, startResults[0].x];
       const endCoords = [endResults[0].y, endResults[0].x];
-      setRoute({ start: startCoords, end: endCoords });
 
-      // Fit the map to the route
-      const bounds = L.latLngBounds(startCoords, endCoords);
-      mapRef.current.fitBounds(bounds);
+      // Find the selected drone's coordinates
+      const selectedDroneObj = fetchedDrones.features.find(drone => drone.properties.name === selectedDrone);
+      if (selectedDroneObj) {
+        const droneCoords = selectedDroneObj.geometry.coordinates;
+        setSelectedDroneId(selectedDroneObj.id)
+        setRoute({ droneStart: [droneCoords[1], droneCoords[0]], start: startCoords, end: endCoords });
+
+        // Fit the map to include all three points
+        const bounds = L.latLngBounds([droneCoords[1], droneCoords[0]], startCoords, endCoords);
+        mapRef.current.fitBounds(bounds);
+      } else {
+        alert('Selected drone not found');
+      }
     } else {
       alert('Could not find one or both locations');
     }
   };
 
-  const handleRouteFound = (coordinates) => {
+  const handleRouteFound = async (coordinates) => {
     setDroneRoute(coordinates);
+    
+    if (selectedDroneId) {
+      try {
+        const response = await fetch(`/api/drones/${selectedDroneId}/set_route/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            waypoints: coordinates
+          }),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to set route');
+        }
+  
+        const data = await response.json();
+        console.log('Route set successfully:', data);
+      } catch (error) {
+        console.error('Error setting route:', error);
+      }
+    }
   };
 
   if (error) {
@@ -176,10 +134,28 @@ function App() {
             attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
           />
           <Search provider={new OpenStreetMapProvider()} />
-          <Facilities facilities={facilities} setActiveFacility={setActiveFacility} />
+          <Facilities 
+            facilities={facilities} 
+            setActiveFacility={setActiveFacility} 
+          />
+          
           <Drones drones={fetchedDrones} />
-          {route && <RoutingMachine start={route.start} end={route.end} handleRouteFound={handleRouteFound} />}
-          {droneRoute && <MovingDrone route={droneRoute} />}
+
+          {route && (
+            <RoutingMachine
+              droneStart={route.droneStart}
+              start={route.start}
+              end={route.end}
+              handleRouteFound={handleRouteFound}
+            />
+          )}
+
+          {droneRoute && (
+            <MovingDrone 
+              route={droneRoute} 
+              droneId={selectedDroneId}
+            /> 
+          )}
         </MapContainer>
 
         <div className="route-form-container">
@@ -188,6 +164,7 @@ function App() {
             <select id="mySelect" value={selectedDrone} onClick={(e) => setSelectedDrone(e.target.value)} required className="route-input">
               <option value="">--Please choose an option--</option>
               {drones && drones?.features?.map((drone) => (
+                !drone.properties.occupied &&
                 <option key={drone?.properties.serial_no} value={drone.properties.name} >
                   {drone.properties.name}
                 </option>

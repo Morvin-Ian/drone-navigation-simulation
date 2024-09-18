@@ -7,6 +7,6 @@ def save_message(message, sender, recepient, dialog, file=None):
     return None
 
 @database_sync_to_async
-def get_user(uuid):
+def get_drone(name):
     return None
 
