@@ -1,9 +1,8 @@
 from channels.db import database_sync_to_async
-from navigate.models import HealthFacilities
 
 
 @database_sync_to_async
-def save_message(message, sender, recepient, dialog, file=None):
+def update_drone_position( lat, lng):
     return None
 
 @database_sync_to_async

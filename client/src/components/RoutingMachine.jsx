@@ -5,7 +5,6 @@ import 'leaflet-routing-machine';
 
 const RoutingMachine = ({ droneStart, start, end, handleRouteFound }) => {
   const map = useMap();
-
   useEffect(() => {
     if (droneStart && start && end) {
       const routingControl = L.Routing.control({

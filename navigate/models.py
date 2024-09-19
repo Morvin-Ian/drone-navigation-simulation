@@ -21,11 +21,11 @@ class Drones(models.Model):
     uuid = models.UUIDField(primary_key=True, default = uuid.uuid4, editable=False)
     name = models.CharField(max_length=80)
     serial_no = models.CharField(max_length=80)
-    battery_capacity = models.IntegerField(default=100)
-    current_charge = models.IntegerField(default=100)
     geom = gis_models.PointField(srid=4326)
     occupied = models.BooleanField(default=False)
     waypoints = models.TextField(blank=True, null=True)
+    departure = gis_models.PointField(srid=4326, blank=True, null=True)
+    destination = gis_models.PointField(srid=4326, blank=True, null=True)
     
     class Meta:
         verbose_name_plural = "Drones"

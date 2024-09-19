@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 
-export const icon = new L.Icon({
+export const red_drone = new L.Icon({
   iconUrl: 'red-drone.png',
   iconSize: [60, 50],
   shadowSize: [50, 64],
@@ -70,7 +70,7 @@ const MovingDrone = ({ route, droneId }) => {
   return (
     <Marker
       position={position}
-      icon={icon}
+      icon={red_drone}
       ref={markerRef}
     />
   );

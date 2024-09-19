@@ -38,6 +38,8 @@ function App() {
   const [activeFacility, setActiveFacility] = useState(null);
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
+  const [startCordinates, setStartCordinates] = useState(null);
+  const [endCordinates, setEndCordinates] = useState(null);
   const [route, setRoute] = useState(null);
   const [selectedDrone, setSelectedDrone] = useState('');
   const [droneRoute, setDroneRoute] = useState(null);
@@ -65,11 +67,17 @@ function App() {
       if (selectedDroneObj) {
         const droneCoords = selectedDroneObj.geometry.coordinates;
         setSelectedDroneId(selectedDroneObj.id)
+        setStartCordinates(startCoords)
+        setEndCordinates(endCoords)
         setRoute({ droneStart: [droneCoords[1], droneCoords[0]], start: startCoords, end: endCoords });
 
         // Fit the map to include all three points
         const bounds = L.latLngBounds([droneCoords[1], droneCoords[0]], startCoords, endCoords);
         mapRef.current.fitBounds(bounds);
+
+        setStart("")
+        setEnd("")
+        setSelectedDrone()
       } else {
         alert('Selected drone not found');
       }
@@ -89,7 +97,9 @@ function App() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            waypoints: coordinates
+            waypoints: coordinates,
+            departure: startCordinates,
+            destination: endCordinates
           }),
         });
   

@@ -9,4 +9,4 @@ class HealthFacilitiesAdmin(LeafletGeoAdmin):
     
 @admin.register(Drones)
 class DronesAdmin(LeafletGeoAdmin):
-    list_display = ('name', 'serial_no', 'battery_capacity', 'current_charge', 'geom')
+    list_display = ('name', 'serial_no',  'geom')
