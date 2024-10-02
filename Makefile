@@ -11,7 +11,7 @@ else
 endif
 
 build:
-	$(DOCKER_COMPOSE) up --build
+	$(DOCKER_COMPOSE) up --build -d --remove-orphans
 
 up:
 	$(DOCKER_COMPOSE) up

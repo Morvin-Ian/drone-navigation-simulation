@@ -17,7 +17,6 @@ def update_drone_position( drone_id, lat, lng):
 
 @database_sync_to_async
 def get_drone(id):
-    print(id)
     drone = Drones.objects.get(id=id)
     if drone:
         return drone

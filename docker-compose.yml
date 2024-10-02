@@ -10,13 +10,13 @@ services:
     env_file:
       - .env
     depends_on:
-      db:
+      data:
         condition: service_healthy
     restart: "on-failure"
     networks:
       - facilities-api
 
-  db:
+  data:
     image: postgis/postgis:13-3.1
     ports:
       - 5432:5432
@@ -42,6 +42,7 @@ services:
       - "5173:5173"
     volumes:
       - ./client:/app
+      - /app/node_modules
     command: npm run dev -- --host 0.0.0.0
     depends_on:
       - facilities-api
