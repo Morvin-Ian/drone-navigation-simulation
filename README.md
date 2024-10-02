@@ -1,7 +1,4 @@
 # Drone Navigation Simulation
-https://github.com/user-attachments/assets/8658b98d-ed47-49b1-bb18-5c3a5b095692
-
-
 ## Setup
     1. git clone git@github.com:Morvin-Ian/drone-navigation-simulation.git
     
