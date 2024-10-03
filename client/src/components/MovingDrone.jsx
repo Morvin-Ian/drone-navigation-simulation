@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Marker, useMap } from 'react-leaflet';
+import { Marker, useMap, Popup } from 'react-leaflet';
 import L from 'leaflet';
 
 export const red_drone = new L.Icon({
@@ -10,21 +10,30 @@ export const red_drone = new L.Icon({
   popupAnchor: [-3, -76],
 });
 
-const MovingDrone = ({ route, droneId }) => {
+const MovingDrone = ({ coordinates, droneId, tracker: initialTracker, name }) => {
   const [position, setPosition] = useState(null);
+  const [tracker, setTracker] = useState(initialTracker); 
   const map = useMap();
   const markerRef = useRef(null);
+  let route = coordinates;
+
+  // If coordinates is a string, parse it to array
+  if (typeof coordinates === 'string') {
+    let formattedString = coordinates.replace(/'/g, '"');
+    route = JSON.parse(formattedString);
+  }
 
   useEffect(() => {
     if (route && route.length > 0) {
-      let i = 0;
       const interval = setInterval(async () => {
-        if (i < route.length) {
-          setPosition(route[i]);
+        if (tracker < route.length) {
+          const newPosition = route[tracker];
+          setPosition(newPosition);
+
           if (markerRef.current) {
-            markerRef.current.setLatLng(route[i]);
+            markerRef.current.setLatLng(newPosition);
           }
-          
+
           // Send position update to API
           try {
             const response = await fetch(`/api/drones/${droneId}/update_position/`, {
@@ -33,8 +42,9 @@ const MovingDrone = ({ route, droneId }) => {
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                lat: route[i].lat,
-                lng: route[i].lng
+                lat: newPosition.lat,
+                lng: newPosition.lng,
+                drone_tracker: tracker,
               }),
             });
             if (!response.ok) {
@@ -44,10 +54,11 @@ const MovingDrone = ({ route, droneId }) => {
             console.error('Error updating drone position:', error);
           }
 
-          i++;
+          // Increment the tracker state
+          setTracker((prevTracker) => prevTracker + 1);
         } else {
           clearInterval(interval);
-          // Route completed, update API using fetch
+          // Route completed, update API 
           try {
             const response = await fetch(`/api/drones/${droneId}/complete_route/`, {
               method: 'POST',
@@ -63,7 +74,7 @@ const MovingDrone = ({ route, droneId }) => {
 
       return () => clearInterval(interval);
     }
-  }, [route, map, droneId]);
+  }, [route, map, droneId, tracker]);
 
   if (!position) return null;
 
@@ -72,7 +83,14 @@ const MovingDrone = ({ route, droneId }) => {
       position={position}
       icon={red_drone}
       ref={markerRef}
-    />
+    >
+      <Popup>
+        <div>
+          <h6>Name: {name}</h6>
+          <h6>Status: On a trip </h6>
+        </div>
+      </Popup>
+    </Marker>
   );
 };
 

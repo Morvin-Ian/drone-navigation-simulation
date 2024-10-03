@@ -1,5 +1,5 @@
-import {  useState, useRef } from 'react';
-import { MapContainer, TileLayer} from 'react-leaflet';
+import { useState, useRef, useEffect } from 'react';
+import { MapContainer, TileLayer } from 'react-leaflet';
 import { Alert, Spinner } from 'react-bootstrap';
 import axios from 'axios';
 import useSWR from 'swr';
@@ -33,7 +33,7 @@ function App() {
   const { data: drones, error: dronesError } = useSWR('/api/drones/', fetcher);
 
   const facilities = data && !error ? data : {};
-  const fetchedDrones = drones && !dronesError ? drones : {};
+  const fetchedDrones = drones || [];
 
   const [activeFacility, setActiveFacility] = useState(null);
   const [start, setStart] = useState('');
@@ -44,14 +44,33 @@ function App() {
   const [selectedDrone, setSelectedDrone] = useState('');
   const [droneRoute, setDroneRoute] = useState(null);
   const [selectedDroneId, setSelectedDroneId] = useState(null);
+  const [existingTrips, setExistingTrips] = useState([]);
+
 
   const mapRef = useRef();
+
+  useEffect(() => {
+    const dronesOnTrip = fetchedDrones?.features?.filter(drone => drone?.properties?.occupied) ?? [];
+    const existingRoutes = dronesOnTrip.map(drone => ({
+      id: drone.id,
+      droneStart: [drone.geometry.coordinates[1], drone.geometry.coordinates[0]],
+      start: drone.properties.departure,
+      end: drone.properties.destination,
+      waypoints: drone.properties.waypoints,
+      drone_tracker: drone.properties.drone_tracker,
+      name:drone.properties.name,
+    }));
+
+    setExistingTrips(prevTrips => [...prevTrips, ...existingRoutes]);
+
+  }, [fetchedDrones]);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const provider = new OpenStreetMapProvider();
 
-    if(start === end){
+    if (start === end) {
       alert('Departure and Destination locations cannot be the same');
       return;
     }
@@ -77,7 +96,7 @@ function App() {
 
         setStart("")
         setEnd("")
-        setSelectedDrone()
+        setSelectedDrone("")
       } else {
         alert('Selected drone not found');
       }
@@ -88,7 +107,7 @@ function App() {
 
   const handleRouteFound = async (coordinates) => {
     setDroneRoute(coordinates);
-    
+
     if (selectedDroneId) {
       try {
         const response = await fetch(`/api/drones/${selectedDroneId}/set_route/`, {
@@ -102,11 +121,11 @@ function App() {
             destination: endCordinates
           }),
         });
-  
+
         if (!response.ok) {
           throw new Error('Failed to set route');
         }
-  
+
         const data = await response.json();
         console.log('Route set successfully:', data);
       } catch (error) {
@@ -144,12 +163,33 @@ function App() {
             attribution="&copy; <a href='http://osm.org/copyright'>OpenStreetMap</a> contributors"
           />
           <Search provider={new OpenStreetMapProvider()} />
-          <Facilities 
-            facilities={facilities} 
-            setActiveFacility={setActiveFacility} 
+          <Facilities
+            facilities={facilities}
+            setActiveFacility={setActiveFacility}
           />
-          
+
           <Drones drones={fetchedDrones} />
+
+          {/* Render RoutingMachine and MovingDrone for existing trips */}
+          {existingTrips.map((trip) => (
+            <div key={trip.id}>
+              <RoutingMachine
+                droneStart={trip.droneStart}
+                start={trip?.start?.coordinates}
+                end={trip?.end?.coordinates}
+                waypoints={trip.waypoints}
+                existingTrips={existingTrips}
+              />
+              {trip?.waypoints &&
+              <MovingDrone
+                coordinates={trip.waypoints}
+                droneId={trip.id}
+                tracker={trip.drone_tracker}
+                name={trip.name}
+              />
+              }
+            </div>
+          ))}
 
           {route && (
             <RoutingMachine
@@ -161,10 +201,12 @@ function App() {
           )}
 
           {droneRoute && (
-            <MovingDrone 
-              route={droneRoute} 
+            <MovingDrone
+              coordinates={droneRoute}
               droneId={selectedDroneId}
-            /> 
+              tracker={0}
+              name={start}
+            />
           )}
         </MapContainer>
 

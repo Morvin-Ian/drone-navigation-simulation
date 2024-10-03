@@ -24,6 +24,7 @@ class Drones(models.Model):
     geom = gis_models.PointField(srid=4326)
     occupied = models.BooleanField(default=False)
     waypoints = models.TextField(blank=True, null=True)
+    drone_tracker = models.IntegerField(blank=True, null=True)
     departure = gis_models.PointField(srid=4326, blank=True, null=True)
     destination = gis_models.PointField(srid=4326, blank=True, null=True)
     
@@ -38,12 +39,14 @@ class Drones(models.Model):
         self.occupied = True
         self.save()
 
-    def update_position(self, new_position):
+    def update_position(self, new_position, drone_tacker):
         self.geom = new_position
+        self.drone_tracker = drone_tacker
         self.save()
 
     def complete_route(self):
         self.waypoints = None
         self.occupied = False
+        self.drone_tracker = 0
         self.save()
     

@@ -13,5 +13,5 @@ class DroneLocationSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Drones
         geo_field = 'geom'
-        fields =('uuid', 'name', 'serial_no' , 'waypoints', 'occupied', 'departure', 'destination')
+        fields =('uuid', 'name', 'serial_no' , 'waypoints', 'drone_tracker','occupied', 'departure', 'destination')
         read_only_fields = ('uuid', 'name', 'serial_no' )
