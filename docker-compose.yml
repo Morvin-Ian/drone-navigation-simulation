@@ -2,9 +2,10 @@ services:
   facilities-api:
     build: .
     container_name: facilities-api
-    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
     volumes:
       - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
     ports:
       - "8000:8000"
     env_file:
@@ -50,11 +51,15 @@ services:
       - facilities-api
 
   nginx:
-    image: nginx:latest
+    build: 
+      context: ./nginx
+      dockerfile: Dockerfile
     ports:
       - 8080:80
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
     depends_on:
       - facilities-api
       - frontend
@@ -74,3 +79,5 @@ networks:
 
 volumes:
   postgres_data:
+  static_volume:
+  media_volume:

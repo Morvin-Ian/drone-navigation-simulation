@@ -3,7 +3,7 @@ import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet-routing-machine';
 
-const RoutingMachine = ({ droneStart, start, end, handleRouteFound }) => {
+const RoutingMachine = ({ droneStart, start, end, handleRouteFound, existingTrips }) => {
   const map = useMap();
   useEffect(() => {
     if (droneStart && start && end) {
@@ -14,7 +14,7 @@ const RoutingMachine = ({ droneStart, start, end, handleRouteFound }) => {
           L.latLng(end[0], end[1]),
         ],
         lineOptions: {
-          styles: [{ color: 'red', weight: 4 }]
+          styles: [{ color: 'orangered', weight: 2 }]
         },
         show: false,
         addWaypoints: false,
@@ -26,12 +26,14 @@ const RoutingMachine = ({ droneStart, start, end, handleRouteFound }) => {
       routingControl.on('routesfound', function (e) {
         const routes = e.routes;
         const coordinates = routes[0].coordinates;
-        handleRouteFound(coordinates);
+        if(handleRouteFound){
+          handleRouteFound(coordinates);
+        }
       });
 
       return () => map.removeControl(routingControl);
     }
-  }, [map, droneStart, start, end]);
+  }, [map, droneStart, start, end, existingTrips]);
 
   return null;
 };
