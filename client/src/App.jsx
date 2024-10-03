@@ -178,7 +178,6 @@ function App() {
                 start={trip?.start?.coordinates}
                 end={trip?.end?.coordinates}
                 waypoints={trip.waypoints}
-                existingTrips={existingTrips}
               />
               {trip?.waypoints &&
               <MovingDrone

@@ -15,6 +15,8 @@ const MovingDrone = ({ coordinates, droneId, tracker: initialTracker, name }) =>
   const [tracker, setTracker] = useState(initialTracker); 
   const map = useMap();
   const markerRef = useRef(null);
+  const websocketRef = useRef(null);
+
   let route = coordinates;
 
   // If coordinates is a string, parse it to array
@@ -22,6 +24,7 @@ const MovingDrone = ({ coordinates, droneId, tracker: initialTracker, name }) =>
     let formattedString = coordinates.replace(/'/g, '"');
     route = JSON.parse(formattedString);
   }
+
 
   useEffect(() => {
     if (route && route.length > 0) {
