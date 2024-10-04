@@ -25,10 +25,40 @@ const MovingDrone = ({ coordinates, droneId, tracker: initialTracker, name }) =>
     route = JSON.parse(formattedString);
   }
 
+  useEffect(() => {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = window.location.protocol === 'https:' ? 'domain.com' : '127.0.0.1:8000';
+
+    // Initialize WebSocket connection
+    websocketRef.current = new WebSocket(`${protocol}//${host}/ws/drones/${droneId}/`)
+    
+    websocketRef.current.onopen = () => {
+      console.log('WebSocket connection opened');
+    };
+
+    websocketRef.current.onmessage = (event) => {
+      console.log('Message from server:', event.data);
+      // Handle server messages if needed
+    };
+
+    websocketRef.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+    };
+
+    websocketRef.current.onclose = () => {
+      console.log('WebSocket connection closed');
+    };
+
+    return () => {
+      if (websocketRef.current) {
+        websocketRef.current.close();
+      }
+    };
+  }, [droneId]);
 
   useEffect(() => {
     if (route && route.length > 0) {
-      const interval = setInterval(async () => {
+      const interval = setInterval(() => {
         if (tracker < route.length) {
           const newPosition = route[tracker];
           setPosition(newPosition);
@@ -37,47 +67,30 @@ const MovingDrone = ({ coordinates, droneId, tracker: initialTracker, name }) =>
             markerRef.current.setLatLng(newPosition);
           }
 
-          // Send position update to API
-          try {
-            const response = await fetch(`/api/drones/${droneId}/update_position/`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                lat: newPosition.lat,
-                lng: newPosition.lng,
-                drone_tracker: tracker,
-              }),
-            });
-            if (!response.ok) {
-              throw new Error('Failed to update drone position');
-            }
-          } catch (error) {
-            console.error('Error updating drone position:', error);
+          // Send position update via WebSocket
+          if (websocketRef.current && websocketRef.current.readyState === WebSocket.OPEN) {
+            websocketRef.current.send(JSON.stringify({
+              lat: newPosition.lat,
+              lng: newPosition.lng,
+              drone_tracker: tracker,
+            }));
           }
 
           // Increment the tracker state
           setTracker((prevTracker) => prevTracker + 1);
         } else {
           clearInterval(interval);
-          // Route completed, update API 
-          try {
-            const response = await fetch(`/api/drones/${droneId}/complete_route/`, {
-              method: 'POST',
-            });
-            if (!response.ok) {
-              throw new Error('Failed to complete route');
-            }
-          } catch (error) {
-            console.error('Error completing route:', error);
+
+          // Notify the server that the route is complete via WebSocket
+          if (websocketRef.current && websocketRef.current.readyState === WebSocket.OPEN) {
+            websocketRef.current.send(JSON.stringify({ action: 'complete_route' }));
           }
         }
       }, 1000); // Move every second
 
       return () => clearInterval(interval);
     }
-  }, [route, map, droneId, tracker]);
+  }, [route, map, tracker]);
 
   if (!position) return null;
 
@@ -90,7 +103,7 @@ const MovingDrone = ({ coordinates, droneId, tracker: initialTracker, name }) =>
       <Popup>
         <div>
           <h6>Name: {name}</h6>
-          <h6>Status: On a trip </h6>
+          <h6>Status: On a trip</h6>
         </div>
       </Popup>
     </Marker>
