@@ -12,14 +12,13 @@ export const red_drone = new L.Icon({
 
 const MovingDrone = ({ coordinates, droneId, tracker: initialTracker, name }) => {
   const [position, setPosition] = useState(null);
-  const [tracker, setTracker] = useState(initialTracker); 
+  const [tracker, setTracker] = useState(initialTracker);
+  const [status, setStatus] = useState('On a trip');
   const map = useMap();
   const markerRef = useRef(null);
   const websocketRef = useRef(null);
 
   let route = coordinates;
-
-  // If coordinates is a string, parse it to array
   if (typeof coordinates === 'string') {
     let formattedString = coordinates.replace(/'/g, '"');
     route = JSON.parse(formattedString);
@@ -28,23 +27,37 @@ const MovingDrone = ({ coordinates, droneId, tracker: initialTracker, name }) =>
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const host = window.location.protocol === 'https:' ? 'domain.com' : '127.0.0.1:8000';
-
-    // Initialize WebSocket connection
-    websocketRef.current = new WebSocket(`${protocol}//${host}/ws/drones/${droneId}/`)
+    
+    websocketRef.current = new WebSocket(`${protocol}//${host}/ws/drones/${droneId}/`);
     
     websocketRef.current.onopen = () => {
       console.log('WebSocket connection opened');
     };
-
+    
     websocketRef.current.onmessage = (event) => {
-      console.log('Message from server:', event.data);
-      // Handle server messages if needed
+      const data = JSON.parse(event.data);
+      console.log('Message from server:', data);
+      
+      if (data.status === 'error') {
+      } else if (data.status === 'success') {
+        if (data.message === 'Position updated') {
+          const newPosition = { lat: data.lat, lng: data.lng };
+          setPosition(newPosition);
+          if (markerRef.current) {
+            markerRef.current.setLatLng(newPosition);
+          }
+          console.log('Position updated');
+        } else if (data.message === 'Route completed') {
+          setStatus('Route completed');
+          console.log('Route completed');
+        }
+      }
     };
-
+    
     websocketRef.current.onerror = (error) => {
       console.error('WebSocket error:', error);
     };
-
+    
     websocketRef.current.onclose = () => {
       console.log('WebSocket connection closed');
     };
@@ -61,13 +74,7 @@ const MovingDrone = ({ coordinates, droneId, tracker: initialTracker, name }) =>
       const interval = setInterval(() => {
         if (tracker < route.length) {
           const newPosition = route[tracker];
-          setPosition(newPosition);
-
-          if (markerRef.current) {
-            markerRef.current.setLatLng(newPosition);
-          }
-
-          // Send position update via WebSocket
+          
           if (websocketRef.current && websocketRef.current.readyState === WebSocket.OPEN) {
             websocketRef.current.send(JSON.stringify({
               lat: newPosition.lat,
@@ -75,38 +82,37 @@ const MovingDrone = ({ coordinates, droneId, tracker: initialTracker, name }) =>
               drone_tracker: tracker,
             }));
           }
-
-          // Increment the tracker state
+          
           setTracker((prevTracker) => prevTracker + 1);
         } else {
           clearInterval(interval);
-
-          // Notify the server that the route is complete via WebSocket
           if (websocketRef.current && websocketRef.current.readyState === WebSocket.OPEN) {
             websocketRef.current.send(JSON.stringify({ action: 'complete_route' }));
           }
         }
-      }, 1000); // Move every second
+      }, 1000);
 
       return () => clearInterval(interval);
     }
-  }, [route, map, tracker]);
+  }, [route, tracker]);
 
   if (!position) return null;
 
   return (
-    <Marker
-      position={position}
-      icon={red_drone}
-      ref={markerRef}
-    >
-      <Popup>
-        <div>
-          <h6>Name: {name}</h6>
-          <h6>Status: On a trip</h6>
-        </div>
-      </Popup>
-    </Marker>
+    <>
+      <Marker
+        position={position}
+        icon={red_drone}
+        ref={markerRef}
+      >
+        <Popup>
+          <div>
+            <h6>Name: {name}</h6>
+            <h6>Status: {status}</h6>
+          </div>
+        </Popup>
+      </Marker>
+    </>
   );
 };
 

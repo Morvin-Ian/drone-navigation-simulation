@@ -122,6 +122,9 @@ function App() {
           }),
         });
 
+        useSWR('/api/facilities/', fetcher);
+
+
         if (!response.ok) {
           throw new Error('Failed to set route');
         }
