@@ -1,5 +1,6 @@
 # Drone Navigation Simulation
-[screen-capture.webm](https://github.com/user-attachments/assets/2e7e79ea-a1d4-48be-85f4-4e6faf5ffc7b)
+
+https://github.com/user-attachments/assets/08372d81-5662-4b48-8453-56ece4f7847e
 
 ## Setup
     1. git clone git@github.com:Morvin-Ian/drone-navigation-simulation.git
