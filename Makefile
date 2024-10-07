@@ -21,6 +21,9 @@ down:
 
 logs:
 	$(DOCKER_COMPOSE) logs
+	
+seed:
+	$(DOCKER_COMPOSE) exec facilities-api python3 manage.py seed_drones
 
 migrate:
 	$(DOCKER_COMPOSE) exec facilities-api python3 manage.py migrate --noinput
