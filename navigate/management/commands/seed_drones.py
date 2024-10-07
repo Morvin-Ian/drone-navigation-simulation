@@ -2,7 +2,7 @@ import random
 import uuid
 from django.core.management.base import BaseCommand
 from faker import Faker
-from your_app.models import Drones
+from navigate.models import Drones
 from django.contrib.gis.geos import Point
 
 class Command(BaseCommand):
