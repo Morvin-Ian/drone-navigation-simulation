@@ -34,4 +34,4 @@ class Command(BaseCommand):
             )
             drone.save()
 
-        self.stdout.write(self.style.SUCCESS('Drones table seeded successfully with locations within Kenya!'))
+        self.stdout.write(self.style.SUCCESS('Drones table seeded successfully!'))
