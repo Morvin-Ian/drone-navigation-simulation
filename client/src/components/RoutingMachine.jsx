@@ -22,7 +22,7 @@ const RoutingMachine = ({ droneStart, start, end, handleRouteFound }) => {
         routeWhileDragging: false,
         fitSelectedRoutes: false,
         showAlternatives: false,
-        createMarker: function() { return null; }, // Disable default markers
+        createMarker: function() { return null; }, 
       }).addTo(map);
 
       routingControl.on('routesfound', function (e) {
