@@ -29,10 +29,8 @@ export const DroneIcon = new L.Icon({
 });
 
 const App = () => {
-  // Refs
   const mapRef = useRef();
 
-  // Custom hooks for data fetching
   const { facilities, isLoading: facilitiesLoading, error: facilitiesError } = useFacilities();
   const { drones, isLoading: dronesLoading, error: dronesError } = useDrones();
 
@@ -51,7 +49,6 @@ const App = () => {
 
   const [existingTrips, setExistingTrips] = useState([]);
 
-  // Effects
   useEffect(() => {
     if (!drones?.features) return;
 
@@ -69,7 +66,6 @@ const App = () => {
     setExistingTrips(prev => [...prev, ...existingRoutes]);
   }, [drones]);
 
-  // Handlers
   const handleRouteSubmit = async (formData) => {
     const { start, end, selectedDrone } = formData;
 
@@ -131,7 +127,6 @@ const App = () => {
     }
   };
 
-  // Error and Loading states
   if (facilitiesError || dronesError) {
     return <Alert variant="destructive">Error loading map data</Alert>;
   }
