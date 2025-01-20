@@ -17,7 +17,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 
 // Hooks and Utils
 import { useFacilities, useDrones } from './hooks/useData';
-import { searchLocation, createBounds } from './utils/mapUtils';
+import { searchLocation, createBounds, calculateDistance } from './utils/mapUtils';
 import { API_ENDPOINTS, MAP_CONFIG } from './config/constants';
 
 export const DroneIcon = new L.Icon({
