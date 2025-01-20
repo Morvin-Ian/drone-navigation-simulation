@@ -216,7 +216,7 @@ function App() {
           <h3>Generate Routes</h3>
           <form onSubmit={handleSubmit} className="route-form">
             <select id="mySelect" value={selectedDrone} onClick={(e) => setSelectedDrone(e.target.value)} required className="route-input">
-              <option value="">--Please choose an option--</option>
+              <option value="">--Choose Drone--</option>
               {drones && drones?.features?.map((drone) => (
                 !drone.properties.occupied &&
                 <option key={drone?.properties.serial_no} value={drone.properties.name} >
