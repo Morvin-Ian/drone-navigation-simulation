@@ -5,19 +5,49 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.contrib.gis.geos import Point
+from django.core.cache import cache
+
 
 class HealthFacilitiesView(ListAPIView):
     queryset = HealthFacilities.objects.all()
     serializer_class = HealthFacilitiesSerializer
     
+    def get_queryset(self):
+        return super().get_queryset().only('name', 'healthcare', 'amenity', 'operatorty', 'geom')
+
+    def list(self, request, *args, **kwargs):
+        cache_key = 'health_facilities_all'
+        cached_data = cache.get(cache_key)
+        
+        if cached_data is not None:
+            return Response(cached_data)
+        
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        cache.set(cache_key, serializer.data, 60 * 15)
+        return Response(serializer.data)
+
+
 class DroneLocationsView(ListAPIView):
     queryset = Drones.objects.all()
     serializer_class = DroneLocationSerializer
+
+    def get_queryset(self):
+        return super().get_queryset().only(
+            'uuid', 'name', 'serial_no', 'geom', 'occupied', 
+            'waypoints', 'drone_tracker', 'departure', 'destination'
+        )
 
 
 class DronesViewSet(viewsets.ModelViewSet):
     queryset = Drones.objects.all()
     serializer_class = DroneLocationSerializer
+
+    def get_queryset(self):
+        return super().get_queryset().only(
+            'uuid', 'name', 'serial_no', 'geom', 'occupied',
+            'waypoints', 'drone_tracker', 'departure', 'destination'
+        )
 
     @action(detail=True, methods=['post'])
     def set_route(self, request, pk=None):
@@ -37,6 +67,9 @@ class DronesViewSet(viewsets.ModelViewSet):
                     
                 drone.set_route(waypoints)
                 drone.save()
+                
+                cache.delete('drones_all')
+                cache.delete('health_facilities_all')
                 
                 return Response({'status': 'route set'})
             except (ValueError, KeyError):
